@@ -181,16 +181,44 @@ export default function Contact() {
                     Síguenos en redes sociales
                   </Typography>
                   <Stack direction="row" justifyContent="center" spacing={2} sx={{ mt: 2 }}>
-                    <IconButton color="primary" aria-label="Facebook">
+                    <IconButton 
+                      color="primary" 
+                      aria-label="Facebook"
+                      component="a" 
+                      href="https://facebook.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
                       <FacebookIcon />
                     </IconButton>
-                    <IconButton color="info" aria-label="Twitter">
+                    <IconButton 
+                      color="info" 
+                      aria-label="Twitter"
+                      component="a" 
+                      href="https://twitter.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
                       <TwitterIcon />
                     </IconButton>
-                    <IconButton color="error" aria-label="Instagram">
+                    <IconButton 
+                      color="error" 
+                      aria-label="Instagram"
+                      component="a" 
+                      href="https://instagram.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
                       <InstagramIcon />
                     </IconButton>
-                    <IconButton color="success" aria-label="WhatsApp">
+                    <IconButton 
+                      color="success" 
+                      aria-label="WhatsApp"
+                      component="a" 
+                      href="https://wa.me/5512345678" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
                       <WhatsAppIcon />
                     </IconButton>
                   </Stack>

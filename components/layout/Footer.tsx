@@ -33,13 +33,34 @@ export default function Footer() {
               Tu tienda de confianza con los mejores productos y servicios.
             </Typography>
             <Stack direction="row" spacing={1}>
-              <IconButton color="inherit" size="small">
+              <IconButton 
+                color="inherit" 
+                size="small"
+                component="a" 
+                href="https://facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
                 <FacebookIcon />
               </IconButton>
-              <IconButton color="inherit" size="small">
+              <IconButton 
+                color="inherit" 
+                size="small"
+                component="a" 
+                href="https://twitter.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
                 <TwitterIcon />
               </IconButton>
-              <IconButton color="inherit" size="small">
+              <IconButton 
+                color="inherit" 
+                size="small"
+                component="a" 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
                 <InstagramIcon />
               </IconButton>
             </Stack>
