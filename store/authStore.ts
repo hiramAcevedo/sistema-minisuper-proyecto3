@@ -25,7 +25,7 @@ const MOCK_USERS = [
     password: 'admin123',
     name: 'Administrador',
     role: 'admin' as const,
-    avatar: '/dogactually.webp'
+    avatar: '/logo_minisuper_.jpeg'
   },
   {
     id: 'usr_2',

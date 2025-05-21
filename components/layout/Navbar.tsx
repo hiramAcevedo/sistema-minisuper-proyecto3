@@ -111,7 +111,7 @@ export default function Navbar() {
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
                     <Image 
-                      src="/dogactually.webp"
+                      src="/logo_minisuper_.jpeg"
                       alt="MiniSuper Logo"
                       width={40}
                       height={40}

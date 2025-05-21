@@ -22,114 +22,13 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ProductCard from '../../components/ui/ProductCard';
-import { Product } from '../../components/ui/ProductCard';
-
-// Datos de ejemplo para productos
-const sampleProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Leche Entera',
-    price: 24.50,
-    image: '/dogactually.webp',
-    category: 'Lácteos',
-    rating: 4.5
-  },
-  {
-    id: '2',
-    name: 'Pan Integral',
-    price: 35.00,
-    image: '/dogactually.webp',
-    category: 'Panadería',
-    rating: 4.3
-  },
-  {
-    id: '3',
-    name: 'Huevos',
-    price: 48.00,
-    image: '/dogactually.webp',
-    category: 'Lácteos',
-    rating: 4.8
-  },
-  {
-    id: '4',
-    name: 'Manzanas',
-    price: 45.50,
-    image: '/dogactually.webp',
-    category: 'Frutas',
-    rating: 4.6
-  },
-  {
-    id: '5',
-    name: 'Arroz',
-    price: 28.00,
-    image: '/dogactually.webp',
-    category: 'Abarrotes',
-    rating: 4.7
-  },
-  {
-    id: '6',
-    name: 'Pasta',
-    price: 18.50,
-    image: '/dogactually.webp',
-    category: 'Abarrotes',
-    rating: 4.4
-  },
-  {
-    id: '7',
-    name: 'Atún en Aceite',
-    price: 22.00,
-    image: '/dogactually.webp',
-    category: 'Conservas',
-    rating: 4.2
-  },
-  {
-    id: '8',
-    name: 'Jabón para Ropa',
-    price: 55.00,
-    image: '/dogactually.webp',
-    category: 'Limpieza',
-    rating: 4.1
-  },
-  {
-    id: '9',
-    name: 'Papel Higiénico',
-    price: 65.00,
-    image: '/dogactually.webp',
-    category: 'Hogar',
-    rating: 4.9
-  },
-  {
-    id: '10',
-    name: 'Refresco de Cola',
-    price: 32.00,
-    image: '/dogactually.webp',
-    category: 'Bebidas',
-    rating: 4.0
-  },
-  {
-    id: '11',
-    name: 'Agua Mineral',
-    price: 15.00,
-    image: '/dogactually.webp',
-    category: 'Bebidas',
-    rating: 4.3
-  },
-  {
-    id: '12',
-    name: 'Pollo',
-    price: 110.00,
-    image: '/dogactually.webp',
-    category: 'Carnes',
-    rating: 4.7
-  }
-];
-
-// Categorías disponibles (extraídas de los productos)
-const categories = [...new Set(sampleProducts.map(product => product.category))];
+import { useProductStore, Product } from '../../store/productStore';
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(sampleProducts);
+  // Usar el store global de productos
+  const { products, categories } = useProductStore();
+  
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
 

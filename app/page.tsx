@@ -29,56 +29,27 @@ import { useCartStore, CartItem } from '../store/cartStore';
 // Imágenes para el carousel
 const carouselImages = [
   {
-    src: '/dogactually.webp',
+    src: '/logo_minisuper_.jpeg',
     alt: 'Promoción de apertura',
     title: '¡Bienvenidos a MiniSuper!',
     subtitle: 'Encuentra todo lo que necesitas en un solo lugar',
   },
   {
-    src: '/dogactually.webp',
+    src: '/manzana.avif',
     alt: 'Productos frescos',
     title: 'Productos frescos todos los días',
     subtitle: 'Calidad garantizada en frutas y verduras',
   },
   {
-    src: '/dogactually.webp',
-    alt: 'Entrega a domicilio',
+    src: '/pollopechuga.jpeg',
+    alt: 'Carnes frescas',
     title: 'Entrega a domicilio',
     subtitle: 'Recibe tus compras sin salir de casa',
   }
 ];
 
-// Productos destacados
-const featuredProducts = [
-  {
-    id: '1',
-    title: 'Leche Entera',
-    price: 24.50,
-    image: '/dogactually.webp',
-    discount: 10
-  },
-  {
-    id: '4',
-    title: 'Manzanas',
-    price: 45.50,
-    image: '/dogactually.webp',
-    discount: 20
-  },
-  {
-    id: '12',
-    title: 'Pollo',
-    price: 110.00,
-    image: '/dogactually.webp',
-    discount: 15
-  },
-  {
-    id: '7',
-    title: 'Atún en Aceite',
-    price: 22.00,
-    image: '/dogactually.webp',
-    discount: 5
-  }
-];
+// Importar el store de productos
+import { useProductStore, Product } from '../store/productStore';
 
 // Componente de Carousel
 const Carousel = ({ images }: { images: typeof carouselImages }) => {
@@ -177,11 +148,13 @@ const Carousel = ({ images }: { images: typeof carouselImages }) => {
 };
 
 // Componente de tarjeta de producto destacado
-const FeaturedProductCard = ({ product }: { product: typeof featuredProducts[0] }) => {
+const FeaturedProductCard = ({ product }: { product: Product }) => {
   const { addItem } = useCartStore();
   const [openSnackbar, setOpenSnackbar] = useState(false);
   
-  const discountedPrice = product.price - (product.price * product.discount / 100);
+  const discountedPrice = product.discountPercent 
+    ? product.price * (1 - product.discountPercent/100) 
+    : product.price;
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -189,7 +162,7 @@ const FeaturedProductCard = ({ product }: { product: typeof featuredProducts[0] 
     
     const cartItem: CartItem = {
       id: product.id,
-      name: product.title,
+      name: product.name,
       price: discountedPrice,
       quantity: 1,
       image: product.image,
@@ -224,16 +197,16 @@ const FeaturedProductCard = ({ product }: { product: typeof featuredProducts[0] 
             >
               <Image
                 src={product.image}
-                alt={product.title}
+                alt={product.name || 'Producto'}
                 width={150}
                 height={150}
                 style={{ objectFit: 'contain' }}
               />
             </CardMedia>
             
-            {product.discount > 0 && (
+            {(product.discountPercent ?? 0) > 0 && (
               <Chip
-                label={`-${product.discount}%`}
+                label={`-${product.discountPercent}%`}
                 color="error"
                 size="small"
                 sx={{
@@ -248,7 +221,7 @@ const FeaturedProductCard = ({ product }: { product: typeof featuredProducts[0] 
           
           <CardContent>
             <Typography variant="h6" component="h3" gutterBottom noWrap>
-              {product.title}
+              {product.name}
             </Typography>
             
             <Stack direction="row" alignItems="center" spacing={1}>
@@ -256,7 +229,7 @@ const FeaturedProductCard = ({ product }: { product: typeof featuredProducts[0] 
                 ${discountedPrice.toFixed(2)}
               </Typography>
               
-              {product.discount > 0 && (
+              {(product.discountPercent ?? 0) > 0 && (
                 <Typography 
                   variant="body2" 
                   color="text.secondary" 
@@ -294,7 +267,7 @@ const FeaturedProductCard = ({ product }: { product: typeof featuredProducts[0] 
           variant="filled"
           sx={{ width: '100%' }}
         >
-          {product.title} agregado al carrito
+          {product.name} agregado al carrito
         </Alert>
       </Snackbar>
     </>
@@ -302,6 +275,8 @@ const FeaturedProductCard = ({ product }: { product: typeof featuredProducts[0] 
 };
 
 export default function Home() {
+  // Obtener productos destacados del store global
+  const { getFeaturedProducts } = useProductStore();
   return (
     <Box>
       {/* Hero section con carousel */}
@@ -416,7 +391,7 @@ export default function Home() {
           </Box>
           
           <Grid container spacing={3}>
-            {featuredProducts.map((product) => (
+            {getFeaturedProducts(4).map((product) => (
               <Grid key={product.id} size={{ xs: 6, sm: 6, md: 3 }}>
                 <FeaturedProductCard product={product} />
               </Grid>

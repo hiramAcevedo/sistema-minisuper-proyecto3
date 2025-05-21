@@ -38,97 +38,17 @@ import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Link from 'next/link';
 import ProtectedRoute from '../../../components/auth/ProtectedRoute';
-
-// Definición del tipo de producto para administración
-type AdminProduct = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  rating: number;
-  category: string;
-  description: string;
-  stock: number;
-  discountPercent?: number;
-  isOutOfStock?: boolean;
-  variant?: string;
-};
-
-// Productos iniciales para el CRUD (basado en los ejemplos existentes)
-const initialProducts: AdminProduct[] = [
-  {
-    id: '1',
-    name: 'Leche Entera',
-    price: 24.50,
-    image: '/dogactually.webp',
-    category: 'Lácteos',
-    rating: 4.5,
-    description: 'Leche entera de alta calidad',
-    stock: 50
-  },
-  {
-    id: '2',
-    name: 'Pan Integral',
-    price: 35.00,
-    image: '/dogactually.webp',
-    category: 'Panadería',
-    rating: 4.3,
-    description: 'Pan integral recién horneado',
-    stock: 30
-  },
-  {
-    id: '3',
-    name: 'Huevos',
-    price: 48.00,
-    image: '/dogactually.webp',
-    category: 'Lácteos',
-    rating: 4.8,
-    description: 'Huevos frescos de gallinas de corral',
-    stock: 100
-  },
-  {
-    id: '4',
-    name: 'Manzanas',
-    price: 45.50,
-    image: '/dogactually.webp',
-    category: 'Frutas',
-    rating: 4.6,
-    description: 'Manzanas rojas frescas',
-    stock: 80
-  },
-  {
-    id: '5',
-    name: 'Arroz',
-    price: 28.00,
-    image: '/dogactually.webp',
-    category: 'Abarrotes',
-    rating: 4.7,
-    description: 'Arroz blanco premium',
-    stock: 120
-  },
-];
-
-// Categorías disponibles
-const categories = [
-  'Lácteos', 
-  'Panadería', 
-  'Frutas', 
-  'Verduras', 
-  'Abarrotes', 
-  'Conservas', 
-  'Limpieza', 
-  'Hogar', 
-  'Bebidas', 
-  'Carnes'
-];
+import { useProductStore, Product } from '../../../store/productStore';
 
 export default function ProductsAdminPage() {
-  // Estado para los productos
-  const [products, setProducts] = useState<AdminProduct[]>(initialProducts);
-  const [filteredProducts, setFilteredProducts] = useState<AdminProduct[]>(initialProducts);
+  // Usar el store global de productos
+  const { products, categories, addProduct, updateProduct, deleteProduct } = useProductStore();
+  
+  // Estado para la UI
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   
   // Estado para el formulario
-  const emptyProduct: AdminProduct = {
+  const emptyProduct: Product = {
     id: '',
     name: '',
     price: 0,
@@ -136,10 +56,11 @@ export default function ProductsAdminPage() {
     category: '',
     rating: 5,
     description: '',
-    stock: 0
+    stock: 0,
+    discountPercent: 0
   };
   
-  const [formData, setFormData] = useState<AdminProduct>(emptyProduct);
+  const [formData, setFormData] = useState<Product>(emptyProduct);
   const [isEditing, setIsEditing] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -182,19 +103,16 @@ export default function ProductsAdminPage() {
     e.preventDefault();
     
     if (isEditing) {
-      // Actualizar producto existente
-      const updatedProducts = products.map(product => 
-        product.id === formData.id ? formData : product
-      );
-      setProducts(updatedProducts);
+      // Actualizar producto existente usando la función del store
+      updateProduct(formData.id, formData);
       setSnackbarMessage('Producto actualizado correctamente');
     } else {
-      // Crear nuevo producto
+      // Crear nuevo producto usando la función del store
       const newProduct = {
         ...formData,
         id: Date.now().toString(),
       };
-      setProducts([...products, newProduct]);
+      addProduct(newProduct);
       setSnackbarMessage('Producto creado correctamente');
     }
     
@@ -204,7 +122,7 @@ export default function ProductsAdminPage() {
     setOpenSnackbar(true);
   };
 
-  const handleEdit = (product: AdminProduct) => {
+  const handleEdit = (product: Product) => {
     setFormData(product);
     setIsEditing(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -217,8 +135,8 @@ export default function ProductsAdminPage() {
 
   const confirmDelete = () => {
     if (deleteId) {
-      const updatedProducts = products.filter(product => product.id !== deleteId);
-      setProducts(updatedProducts);
+      // Eliminar producto usando la función del store
+      deleteProduct(deleteId);
       setOpenDialog(false);
       setDeleteId(null);
       setSnackbarMessage('Producto eliminado correctamente');
@@ -287,6 +205,20 @@ export default function ProductsAdminPage() {
                   margin="normal"
                 />
                 
+                <TextField
+                  fullWidth
+                  label="Descuento (%)"
+                  name="discountPercent"
+                  type="number"
+                  value={formData.discountPercent || 0}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                  }}
+                  variant="outlined"
+                  margin="normal"
+                />
+                
                 <FormControl fullWidth margin="normal">
                   <InputLabel id="category-label">Categoría</InputLabel>
                   <Select
@@ -319,16 +251,38 @@ export default function ProductsAdminPage() {
               </Grid>
               
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="URL de Imagen"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                  margin="normal"
-                  helperText="Dejar en blanco para usar la imagen por defecto"
-                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="image-label">Imagen</InputLabel>
+                  <Select
+                    labelId="image-label"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleSelectChange}
+                    label="Imagen"
+                  >
+                    <MenuItem value="/dogactually.webp">Imagen por defecto</MenuItem>
+                    <MenuItem value="/leche1.webp">Leche</MenuItem>
+                    <MenuItem value="/panela.webp">Pan</MenuItem>
+                    <MenuItem value="/huevo.jpeg">Huevos</MenuItem>
+                    <MenuItem value="/manzana.avif">Manzanas</MenuItem>
+                    <MenuItem value="/arroz.jpg">Arroz</MenuItem>
+                    <MenuItem value="/tortillas.jpeg">Tortillas</MenuItem>
+                    <MenuItem value="/creama1.webp">Crema</MenuItem>
+                    <MenuItem value="/jabon_polvo.webp">Jabón</MenuItem>
+                    <MenuItem value="/mini_escoba.jpeg">Escoba</MenuItem>
+                    <MenuItem value="/cocacola.jpg">Coca Cola</MenuItem>
+                    <MenuItem value="/topochico.jpeg">Agua</MenuItem>
+                    <MenuItem value="/pollopechuga.jpeg">Pollo</MenuItem>
+                    <MenuItem value="/bistec.jpg">Bistec</MenuItem>
+                    <MenuItem value="/costillas.jpeg">Costillas</MenuItem>
+                    <MenuItem value="/platano.png">Plátano</MenuItem>
+                    <MenuItem value="/sandia.jpg">Sandía</MenuItem>
+                    <MenuItem value="/quesofundir.jpeg">Queso</MenuItem>
+                    <MenuItem value="/monster.jpg">Monster</MenuItem>
+                    <MenuItem value="/fabuloso_pisos.jpeg">Limpiador</MenuItem>
+                    <MenuItem value="/cloro.webp">Cloro</MenuItem>
+                  </Select>
+                </FormControl>
                 
                 <TextField
                   fullWidth
@@ -437,7 +391,28 @@ export default function ProductsAdminPage() {
                       </TableCell>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>{product.category}</TableCell>
-                      <TableCell align="right">${product.price.toFixed(2)}</TableCell>
+                      <TableCell align="right">
+                        {product.discountPercent ? (
+                          <Box>
+                            <Typography 
+                              component="span" 
+                              sx={{ 
+                                textDecoration: 'line-through', 
+                                color: 'text.secondary', 
+                                fontSize: '0.8rem',
+                                mr: 1
+                              }}
+                            >
+                              ${product.price.toFixed(2)}
+                            </Typography>
+                            <Typography component="span" color="error.main" fontWeight="bold">
+                              ${(product.price * (1 - product.discountPercent/100)).toFixed(2)}
+                            </Typography>
+                          </Box>
+                        ) : (
+                          `$${product.price.toFixed(2)}`
+                        )}
+                      </TableCell>
                       <TableCell align="right">
                         <Box sx={{ 
                           display: 'inline-block',

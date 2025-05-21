@@ -28,6 +28,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import { useCartStore, CartItem } from '../../../store/cartStore';
+import { useProductStore, Product } from '../../../store/productStore';
 
 // Tipos para variantes
 type Variant = {
@@ -35,40 +36,20 @@ type Variant = {
   name: string;
 };
 
-// Tipos para productos
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  image: string;
-  brand: string;
-  rating: number;
-  variants: Variant[];
-};
-
-// Simulación del fetch de producto por ID
-const getProductById = (id: string): Product => {
-  return {
-    id,
-    title: '1 Kilo de Frijoles',
-    description: 'Frijoles de alta calidad, seleccionados cuidadosamente para garantizar el mejor sabor en sus platillos.',
-    price: 40,
-    image: '/dogactually.webp',
-    brand: 'genérica',
-    rating: 4.0,
-    variants: [
-      { id: 'v1', name: 'Frijoles bayos' },
-      { id: 'v2', name: 'Frijoles Negros' },
-      { id: 'v3', name: 'Frijoles peruanos' },
-    ]
-  };
-};
-
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Usado React.use para desenvolver los parámetros que ahora son una promesa en Next.js 15
   const resolvedParams = React.use(params);
-  const product = getProductById(resolvedParams.id);
+  const { getProductById } = useProductStore();
+  const product = getProductById(resolvedParams.id) || {
+    id: '',
+    name: 'Producto no encontrado',
+    description: 'Este producto no existe o ha sido eliminado',
+    price: 0,
+    image: '/dogactually.webp',
+    category: '',
+    rating: 0,
+    stock: 0
+  };
   
   const [selectedVariant, setSelectedVariant] = useState<string | null>('v1');
   const [quantity, setQuantity] = useState(2);
@@ -98,11 +79,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
   
   const handleAddToCart = () => {
-    const selectedVariantData = product.variants.find(v => v.id === selectedVariant);
+    const variants = [
+      { id: 'v1', name: 'Variante 1' },
+      { id: 'v2', name: 'Variante 2' },
+      { id: 'v3', name: 'Variante 3' }
+    ];
+    
+    const selectedVariantData = variants.find(v => v.id === selectedVariant);
     
     const cartItem: CartItem = {
       id: product.id,
-      name: product.title,
+      name: product.name,
       price: product.price,
       quantity: quantity,
       image: product.image,
@@ -125,12 +112,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <Grid size={{ xs: 12, md: 6 }}>
             <Box>
               <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
-                {product.title}
+                {product.name}
               </Typography>
               
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  marca: {product.brand}
+                  categoría: {product.category}
                 </Typography>
                 <Rating value={product.rating} precision={0.1} readOnly size="small" />
                 <Typography variant="body2" color="text.secondary">
@@ -153,7 +140,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   aria-label="variantes de producto"
                   sx={{ mb: 2 }}
                 >
-                  {product.variants.map((variant) => (
+                  {[
+                    { id: 'v1', name: 'Variante 1' },
+                    { id: 'v2', name: 'Variante 2' },
+                    { id: 'v3', name: 'Variante 3' }
+                  ].map((variant) => (
                     <ToggleButton 
                       key={variant.id} 
                       value={variant.id}
@@ -254,7 +245,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               >
                 <Image 
                   src={product.image}
-                  alt={product.title}
+                  alt={product.name}
                   width={300}
                   height={300}
                   style={{ objectFit: 'contain' }}
@@ -341,7 +332,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           variant="filled"
           sx={{ width: '100%' }}
         >
-          {product.title} agregado al carrito
+          {product.name} agregado al carrito
         </Alert>
       </Snackbar>
     </Container>
